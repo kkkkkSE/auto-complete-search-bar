@@ -48,7 +48,8 @@ const defaultTheme = {
   colors: {
     white: '#FFFFFF',
     black: '#282828',
-    main: '#D8EBFF',
+    main: '#1D80E3',
+    sub: '#D8EBFF',
     gray50: '#FAFAFA',
     gray100: '#F5F5F5',
     gray200: '#EEEEEE',
