@@ -1,0 +1,14 @@
+import { configureStore } from '@reduxjs/toolkit';
+
+import SearchSlice from './SearchSlice';
+
+const store = configureStore({
+  reducer: {
+    search: SearchSlice.reducer,
+  },
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+
+export default store;
