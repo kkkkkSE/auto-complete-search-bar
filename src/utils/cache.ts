@@ -14,8 +14,6 @@ export const setCache = ({
 
     const cacheValueString = JSON.stringify(cacheValue);
 
-    clearExpiredCache(key);
-
     const newCacheData = {
       ...cacheData,
       [cacheKey]: {
@@ -66,29 +64,5 @@ export const getCache = ({
     }
 
     return null;
-  }
-};
-
-export const clearExpiredCache = (key: string) => {
-  try {
-    const cacheDataString = localStorage.getItem(key);
-
-    const cacheData = cacheDataString ? JSON.parse(cacheDataString) : {};
-
-    const cacheKeys = Object.keys(cacheData);
-
-    const now = Date.now();
-
-    cacheKeys.forEach((cacheKey: string) => {
-      if (cacheData[cacheKey].expire <= now) {
-        delete cacheData[cacheKey];
-      }
-    });
-
-    localStorage.setItem(key, JSON.stringify(cacheData));
-  } catch (e) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
-    }
   }
 };
