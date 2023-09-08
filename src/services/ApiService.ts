@@ -1,13 +1,11 @@
 import axios, { AxiosInstance } from 'axios';
 
-const API_BASE_URL = 'http://localhost:4000/';
-
 export default class ApiService {
   #instance : AxiosInstance;
 
   constructor() {
     this.#instance = axios.create({
-      baseURL: API_BASE_URL,
+      baseURL: process.env.API_BASE_URL,
     });
   }
 
