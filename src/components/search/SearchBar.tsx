@@ -7,7 +7,7 @@ import {
   setIsFocusSearchInput,
   setIsKeyDownActive,
 } from '../../stores/SearchSlice';
-import { resetFocusIndex, setFocusIndex, setSearchText } from '../../stores/SuggestionListSlice';
+import { setFocusIndex, setSearchText } from '../../stores/SuggestionListSlice';
 
 import { MAX_LIST_ITEM } from '../../constants/search';
 
@@ -37,7 +37,6 @@ export default function SearchBar({ onChangeSearchInput }: SearchBarProps) {
 
   const blurSearchInput = () => {
     dispatch(setIsFocusSearchInput(false));
-    dispatch(resetFocusIndex());
     dispatch(setIsKeyDownActive(false));
   };
 
@@ -82,7 +81,6 @@ export default function SearchBar({ onChangeSearchInput }: SearchBarProps) {
       event.preventDefault();
 
       dispatch(setIsFocusSearchInput(false));
-      dispatch(resetFocusIndex());
       dispatch(setIsKeyDownActive(false));
     }
 
