@@ -11,7 +11,7 @@ import { resetFocusIndex, setFocusIndex, setSearchText } from '../../stores/Sugg
 
 import { MAX_LIST_ITEM } from '../../constants/search';
 
-import SearchButton from './SerachButton';
+import SearchButton from './SearchButton';
 
 interface SearchBarProps {
   onChangeSearchInput: (event: React.ChangeEvent<HTMLInputElement>) => void;
