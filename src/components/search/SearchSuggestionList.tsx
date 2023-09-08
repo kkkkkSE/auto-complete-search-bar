@@ -5,7 +5,7 @@ import { useSelector } from '../../stores/hooks';
 import SearchSuggestionItem from './SearchSuggestionItem';
 
 export default function SearchSuggestionList() {
-  const { isError, searchSuggestionList } = useSelector((state) => state.search);
+  const { isError, suggestionList } = useSelector((state) => state.suggestionList);
 
   if (isError) {
     return (
@@ -15,7 +15,7 @@ export default function SearchSuggestionList() {
     );
   }
 
-  if (searchSuggestionList.length === 0) {
+  if (suggestionList.length === 0) {
     return (
       <Container>
         <p>검색어 없음</p>
@@ -27,7 +27,7 @@ export default function SearchSuggestionList() {
     <Container>
       <p>추천 검색어</p>
       <ul>
-        {searchSuggestionList.map((item, index) => (
+        {suggestionList.map((item, index) => (
           <SearchSuggestionItem
             key={item.sickCd}
             sickName={item.sickNm}

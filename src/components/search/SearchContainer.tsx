@@ -6,12 +6,15 @@ import { CACHE_KEY_SEARCH } from '../../constants/cacheKey';
 
 import { useDispatch, useSelector } from '../../stores/hooks';
 import {
-  fetchSickList,
-  setSearchSuggestionList,
-  resetSearchSuggestionList,
-  resetFocusIndex,
-  changeInputByChangeEvent,
+  setIsKeyDownActive,
 } from '../../stores/SearchSlice';
+import {
+  fetchSickList,
+  resetFocusIndex,
+  resetSuggestionList,
+  setSearchText,
+  setSuggestionList,
+} from '../../stores/SuggestionListSlice';
 
 import useDebounce from '../../hooks/useDebounce';
 
@@ -21,20 +24,15 @@ import SearchSuggestionList from './SearchSuggestionList';
 export default function SearchContainer() {
   const dispatch = useDispatch();
 
-  const { searchText, isFocusSearchInput, isKeyDownActive } = useSelector((state) => state.search);
+  const { isFocusSearchInput, isKeyDownActive } = useSelector((state) => state.search);
+  const { searchText } = useSelector((state) => state.suggestionList);
 
   const getSuggestionList = async (text: string) => {
-    if (isKeyDownActive) {
-      return;
-    }
-
     if (!text) {
-      dispatch(resetSearchSuggestionList());
+      dispatch(resetSuggestionList());
 
       return;
     }
-
-    dispatch(resetFocusIndex());
 
     const cacheData = getCache({
       key: CACHE_KEY_SEARCH,
@@ -42,7 +40,7 @@ export default function SearchContainer() {
     });
 
     if (cacheData) {
-      dispatch(setSearchSuggestionList(cacheData));
+      dispatch(setSuggestionList(cacheData));
 
       return;
     }
@@ -50,7 +48,7 @@ export default function SearchContainer() {
     dispatch(fetchSickList(text));
   };
 
-  const getDebounceSuggestionList = useDebounce({
+  const debounceGetSuggestionList = useDebounce({
     delay: 180,
     callback: getSuggestionList,
   });
@@ -58,9 +56,13 @@ export default function SearchContainer() {
   const handleChangeSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
 
-    dispatch(changeInputByChangeEvent(value));
+    dispatch(resetFocusIndex());
+    dispatch(setIsKeyDownActive(false));
+    dispatch(setSearchText(value));
 
-    getDebounceSuggestionList(value);
+    if (!isKeyDownActive) {
+      debounceGetSuggestionList(value);
+    }
   };
 
   return (
