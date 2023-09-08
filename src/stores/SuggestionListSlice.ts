@@ -51,8 +51,8 @@ export const SuggestionListSlice = createSlice({
     setSearchText: (state, { payload: text }) => {
       state.searchText = text;
     },
-    resetSearctText: (state) => {
-      state.searchText = initialState.searchText;
+    resetSearchText: (state) => {
+      state.searchText = '';
     },
     setFocusIndex: (state, { payload: index }) => {
       state.focusIndex = index;
@@ -97,7 +97,7 @@ export const SuggestionListSlice = createSlice({
 
 export const {
   setSearchText,
-  resetSearctText,
+  resetSearchText,
   setFocusIndex,
   resetFocusIndex,
   setSuggestionList,
