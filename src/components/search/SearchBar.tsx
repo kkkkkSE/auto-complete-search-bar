@@ -9,13 +9,18 @@ import {
   focusPrevItem,
   closeSuggestionList,
   changeInputByKeyDownEvent,
-  changeInputByChangeEvent,
   setIsFocusSearchInput,
 } from '../../stores/SearchSlice';
 
 import SearchButton from './SerachButton';
 
-export default function SearchBar() {
+interface SearchBarProps {
+  onChangeSearchInput : (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export default function SearchBar({
+  onChangeSearchInput,
+}: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const dispatch = useDispatch();
@@ -32,12 +37,6 @@ export default function SearchBar() {
       inputRef.current.selectionEnd = keyword.length;
     }
   }, [focusIndex]);
-
-  const changeSearchText = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
-
-    dispatch(changeInputByChangeEvent(value));
-  };
 
   const focusSearchInput = () => {
     dispatch(setIsFocusSearchInput(true));
@@ -77,7 +76,7 @@ export default function SearchBar() {
         name="search-sick"
         placeholder="질환명을 입력해 주세요."
         value={searchText}
-        onChange={changeSearchText}
+        onChange={onChangeSearchInput}
         onFocus={focusSearchInput}
         onBlur={blurSearchInput}
         onKeyDown={handleKeydownInInput}

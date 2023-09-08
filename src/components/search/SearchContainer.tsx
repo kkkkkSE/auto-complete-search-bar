@@ -1,15 +1,19 @@
 import { styled } from 'styled-components';
 
-import useDebounce from '../../hooks/useDebounce';
-
 import { getCache } from '../../utils/cache';
 
 import { CACHE_KEY_SEARCH } from '../../constants/cacheKey';
 
 import { useDispatch, useSelector } from '../../stores/hooks';
 import {
-  fetchSickList, setSearchSuggestionList, resetSearchSuggestionList, resetFocusIndex,
+  fetchSickList,
+  setSearchSuggestionList,
+  resetSearchSuggestionList,
+  resetFocusIndex,
+  changeInputByChangeEvent,
 } from '../../stores/SearchSlice';
+
+import useDebounce from '../../hooks/useDebounce';
 
 import SearchBar from './SearchBar';
 import SearchSuggestionList from './SearchSuggestionList';
@@ -19,12 +23,12 @@ export default function SearchContainer() {
 
   const { searchText, isFocusSearchInput, isKeyDownActive } = useSelector((state) => state.search);
 
-  const getSearchSuggestionList = async () => {
+  const getSuggestionList = async (text: string) => {
     if (isKeyDownActive) {
       return;
     }
 
-    if (!searchText) {
+    if (!text) {
       dispatch(resetSearchSuggestionList());
 
       return;
@@ -34,7 +38,7 @@ export default function SearchContainer() {
 
     const cacheData = getCache({
       key: CACHE_KEY_SEARCH,
-      cacheKey: searchText,
+      cacheKey: text,
     });
 
     if (cacheData) {
@@ -43,18 +47,25 @@ export default function SearchContainer() {
       return;
     }
 
-    dispatch(fetchSickList(searchText));
+    dispatch(fetchSickList(text));
   };
 
-  useDebounce({
+  const getDebounceSuggestionList = useDebounce({
     delay: 180,
-    callback: getSearchSuggestionList,
-    trigger: searchText,
+    callback: getSuggestionList,
   });
+
+  const handleChangeSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+
+    dispatch(changeInputByChangeEvent(value));
+
+    getDebounceSuggestionList(value);
+  };
 
   return (
     <Container>
-      <SearchBar />
+      <SearchBar onChangeSearchInput={handleChangeSearchInput} />
       {searchText && isFocusSearchInput && (
         <SearchSuggestionList />
       )}
