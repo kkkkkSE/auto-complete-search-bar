@@ -1,4 +1,4 @@
-const EXPIRE_TIME = 1 * 1000 * 60;
+const EXPIRE_TIME = 60_000;
 
 export const setCache = ({
   key, cacheKey, cacheValue,
@@ -7,13 +7,15 @@ export const setCache = ({
   cacheKey : string;
   cacheValue: unknown;
 }) => {
-  const cacheDataString = localStorage.getItem(key);
-
-  const cacheData = cacheDataString ? JSON.parse(cacheDataString) : {};
-
-  const cacheValueString = JSON.stringify(cacheValue);
-
   try {
+    const cacheDataString = localStorage.getItem(key);
+
+    const cacheData = cacheDataString ? JSON.parse(cacheDataString) : {};
+
+    const cacheValueString = JSON.stringify(cacheValue);
+
+    clearExpiredCache(key);
+
     const newCacheData = {
       ...cacheData,
       [cacheKey]: {
@@ -38,23 +40,55 @@ export const getCache = ({
   key: string;
   cacheKey: string;
 }) => {
-  const cacheDataString = localStorage.getItem(key);
+  try {
+    const cacheDataString = localStorage.getItem(key);
 
-  const cacheData = cacheDataString ? JSON.parse(cacheDataString) : {};
+    const cacheData = cacheDataString ? JSON.parse(cacheDataString) : {};
 
-  const searchCache = cacheData[cacheKey] || '';
+    const searchCache = cacheData[cacheKey] || '';
 
-  if (!searchCache) {
+    if (!searchCache) {
+      return null;
+    }
+
+    if (Date.now() > searchCache.expire) {
+      delete cacheData[cacheKey];
+
+      localStorage.setItem(key, JSON.stringify(cacheData));
+
+      return null;
+    }
+
+    return JSON.parse(searchCache.data);
+  } catch (e) {
+    if (e instanceof Error) {
+      throw new Error(e.message);
+    }
+
     return null;
   }
+};
 
-  if (Date.now() > searchCache.expire) {
-    delete cacheData[cacheKey];
+export const clearExpiredCache = (key: string) => {
+  try {
+    const cacheDataString = localStorage.getItem(key);
+
+    const cacheData = cacheDataString ? JSON.parse(cacheDataString) : {};
+
+    const cacheKeys = Object.keys(cacheData);
+
+    const now = Date.now();
+
+    cacheKeys.forEach((cacheKey: string) => {
+      if (cacheData[cacheKey].expire <= now) {
+        delete cacheData[cacheKey];
+      }
+    });
 
     localStorage.setItem(key, JSON.stringify(cacheData));
-
-    return null;
+  } catch (e) {
+    if (e instanceof Error) {
+      throw new Error(e.message);
+    }
   }
-
-  return JSON.parse(searchCache.data);
 };

@@ -25,6 +25,14 @@ module.exports = {
       },
     },
   },
+  overrides: [
+    {
+      files: ['**/*Slice.ts'],
+      rules: {
+        'no-param-reassign': 'off',
+      },
+    },
+  ],
   rules: {
     indent: ['error', 2],
     'no-trailing-spaces': 'error',

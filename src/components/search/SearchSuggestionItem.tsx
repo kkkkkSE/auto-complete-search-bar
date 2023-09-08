@@ -1,7 +1,7 @@
 import { styled } from 'styled-components';
 
 import { useDispatch, useSelector } from '../../stores/hooks';
-import { resetFocusIndex, setFocusIndex } from '../../stores/SearchSlice';
+import { resetFocusIndex, setFocusIndex } from '../../stores/SuggestionListSlice';
 
 import SearchIcon from '../../../static/images/search-icon.svg';
 
@@ -15,7 +15,7 @@ export default function SearchSuggestionItem({
 }: SearchSuggestionItemProps) {
   const dispatch = useDispatch();
 
-  const { focusIndex } = useSelector((state) => state.search);
+  const { focusIndex } = useSelector((state) => state.suggestionList);
 
   const changeFocusIndex = () => {
     dispatch(setFocusIndex(index));

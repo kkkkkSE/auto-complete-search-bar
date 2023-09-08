@@ -1,27 +1,24 @@
-import { useEffect, useRef } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useRef } from 'react';
 
-const useDebounce = ({
-  delay, callback, trigger,
-}:{
+const useDebounce = <T extends any[]>({
+  delay,
+  callback,
+}: {
   delay: number;
-  trigger: unknown;
-  callback: (...args: never[]) => unknown;
+  callback: (...args: T) => unknown;
 }) => {
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<NodeJS.Timeout>();
 
-  useEffect(() => {
+  const debounceCallback = (...args: T) => {
+    clearInterval(debounceRef.current);
+
     debounceRef.current = setTimeout(async () => {
-      callback();
+      callback(...args);
     }, delay);
+  };
 
-    return () => {
-      if (debounceRef.current) {
-        clearInterval(debounceRef.current);
-
-        debounceRef.current = null;
-      }
-    };
-  }, [trigger]);
+  return debounceCallback;
 };
 
 export default useDebounce;

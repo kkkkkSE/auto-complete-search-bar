@@ -1,15 +1,22 @@
 import { styled } from 'styled-components';
 
-import useDebounce from '../../hooks/useDebounce';
-
 import { getCache } from '../../utils/cache';
 
 import { CACHE_KEY_SEARCH } from '../../constants/cacheKey';
 
 import { useDispatch, useSelector } from '../../stores/hooks';
 import {
-  fetchSickList, setSearchSuggestionList, resetSearchSuggestionList, resetFocusIndex,
+  setIsKeyDownActive,
 } from '../../stores/SearchSlice';
+import {
+  fetchSickList,
+  resetFocusIndex,
+  resetSuggestionList,
+  setSearchText,
+  setSuggestionList,
+} from '../../stores/SuggestionListSlice';
+
+import useDebounce from '../../hooks/useDebounce';
 
 import SearchBar from './SearchBar';
 import SearchSuggestionList from './SearchSuggestionList';
@@ -17,44 +24,50 @@ import SearchSuggestionList from './SearchSuggestionList';
 export default function SearchContainer() {
   const dispatch = useDispatch();
 
-  const { searchText, isFocusSearchInput, isKeyDownActive } = useSelector((state) => state.search);
+  const { isFocusSearchInput, isKeyDownActive } = useSelector((state) => state.search);
+  const { searchText } = useSelector((state) => state.suggestionList);
 
-  const getSearchSuggestionList = async () => {
-    if (isKeyDownActive) {
-      return;
-    }
-
-    if (!searchText) {
-      dispatch(resetSearchSuggestionList());
+  const getSuggestionList = async (text: string) => {
+    if (!text) {
+      dispatch(resetSuggestionList());
 
       return;
     }
-
-    dispatch(resetFocusIndex());
 
     const cacheData = getCache({
       key: CACHE_KEY_SEARCH,
-      cacheKey: searchText,
+      cacheKey: text,
     });
 
     if (cacheData) {
-      dispatch(setSearchSuggestionList(cacheData));
+      dispatch(setSuggestionList(cacheData));
 
       return;
     }
 
-    dispatch(fetchSickList(searchText));
+    dispatch(fetchSickList(text));
   };
 
-  useDebounce({
+  const debounceGetSuggestionList = useDebounce({
     delay: 180,
-    callback: getSearchSuggestionList,
-    trigger: searchText,
+    callback: getSuggestionList,
   });
+
+  const handleChangeSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+
+    dispatch(resetFocusIndex());
+    dispatch(setIsKeyDownActive(false));
+    dispatch(setSearchText(value));
+
+    if (!isKeyDownActive) {
+      debounceGetSuggestionList(value);
+    }
+  };
 
   return (
     <Container>
-      <SearchBar />
+      <SearchBar onChangeSearchInput={handleChangeSearchInput} />
       {searchText && isFocusSearchInput && (
         <SearchSuggestionList />
       )}

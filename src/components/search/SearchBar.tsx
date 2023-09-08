@@ -1,42 +1,34 @@
 /* eslint-disable jsx-a11y/no-autofocus */
-import { useEffect, useRef } from 'react';
-
 import { styled } from 'styled-components';
 
 import { useDispatch, useSelector } from '../../stores/hooks';
+
 import {
-  focusNextItem,
-  focusPrevItem,
-  closeSuggestionList,
-  changeInputByKeyDownEvent,
-  changeInputByChangeEvent,
   setIsFocusSearchInput,
+  setIsKeyDownActive,
 } from '../../stores/SearchSlice';
+import { setFocusIndex, setSearchText } from '../../stores/SuggestionListSlice';
 
-import SearchButton from './SerachButton';
+import { MAX_LIST_ITEM } from '../../constants/search';
 
-export default function SearchBar() {
-  const inputRef = useRef<HTMLInputElement>(null);
+import SearchButton from './SearchButton';
 
+interface SearchBarProps {
+  onChangeSearchInput: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export default function SearchBar({ onChangeSearchInput }: SearchBarProps) {
   const dispatch = useDispatch();
 
-  const { searchText, focusIndex, searchSuggestionList } = useSelector((state) => state.search);
+  const { searchText } = useSelector((state) => state.suggestionList);
+  const { focusIndex, suggestionList } = useSelector(
+    (state) => state.suggestionList,
+  );
 
-  useEffect(() => {
-    if (focusIndex >= 0 && inputRef.current) {
-      const keyword = searchSuggestionList[focusIndex].sickNm;
+  const getKeyword = (index: number) => {
+    if (index < 0) return '';
 
-      dispatch(changeInputByKeyDownEvent(keyword));
-
-      inputRef.current.selectionStart = keyword.length;
-      inputRef.current.selectionEnd = keyword.length;
-    }
-  }, [focusIndex]);
-
-  const changeSearchText = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
-
-    dispatch(changeInputByChangeEvent(value));
+    return suggestionList[index].sickNm;
   };
 
   const focusSearchInput = () => {
@@ -45,24 +37,51 @@ export default function SearchBar() {
 
   const blurSearchInput = () => {
     dispatch(setIsFocusSearchInput(false));
-    dispatch(closeSuggestionList());
+    dispatch(setIsKeyDownActive(false));
   };
 
-  const handleKeydownInInput = (event: React.KeyboardEvent) => {
+  const handleKeydownInput = (event: React.KeyboardEvent) => {
     if (event.nativeEvent.isComposing) return;
 
-    if (event.key === 'ArrowDown') {
-      dispatch(focusNextItem());
-    }
+    const listLength = suggestionList.length;
 
-    if (event.key === 'ArrowUp') {
-      dispatch(focusPrevItem());
+    const maxLength = Math.min(listLength, MAX_LIST_ITEM);
+
+    if (maxLength > 0) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+
+        const nextIndex = focusIndex + 1 < maxLength
+          ? focusIndex + 1
+          : 0;
+
+        const keyword = getKeyword(nextIndex);
+
+        dispatch(setIsKeyDownActive(true));
+        dispatch(setFocusIndex(nextIndex));
+        dispatch(setSearchText(keyword));
+      }
+
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+
+        const prevIndex = focusIndex - 1 >= 0
+          ? focusIndex - 1
+          : maxLength - 1;
+
+        const keyword = getKeyword(prevIndex);
+
+        dispatch(setIsKeyDownActive(true));
+        dispatch(setFocusIndex(prevIndex));
+        dispatch(setSearchText(keyword));
+      }
     }
 
     if (event.key === 'Escape') {
       event.preventDefault();
 
-      dispatch(closeSuggestionList());
+      dispatch(setIsFocusSearchInput(false));
+      dispatch(setIsKeyDownActive(false));
     }
 
     if (event.key === 'Enter') {
@@ -77,13 +96,12 @@ export default function SearchBar() {
         name="search-sick"
         placeholder="질환명을 입력해 주세요."
         value={searchText}
-        onChange={changeSearchText}
+        onChange={onChangeSearchInput}
         onFocus={focusSearchInput}
         onBlur={blurSearchInput}
-        onKeyDown={handleKeydownInInput}
+        onKeyDown={handleKeydownInput}
         autoFocus
         autoComplete="off"
-        ref={inputRef}
       />
       <SearchButton />
     </Container>
