@@ -84,6 +84,8 @@ export const clearExpiredCache = (key: string) => {
         delete cacheData[cacheKey];
       }
     });
+
+    localStorage.setItem(key, JSON.stringify(cacheData));
   } catch (e) {
     if (e instanceof Error) {
       throw new Error(e.message);
