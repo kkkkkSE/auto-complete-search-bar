@@ -4,6 +4,8 @@
 
 ![미리보기](https://github.com/kkkkkSE/react-github-issue-dashboard/assets/95907436/467c7e47-9b43-4267-960d-984d0b32cf4b)
 
+배포 링크 : [https://pre-onboarding-3-kkkkkse.vercel.app](https://pre-onboarding-3-kkkkkse.vercel.app)
+
 ## 개발 Keyword
 
 - Debounce를 이용한 API 호출 횟수 줄이기
